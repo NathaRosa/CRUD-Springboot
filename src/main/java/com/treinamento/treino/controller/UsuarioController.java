@@ -1,6 +1,7 @@
 package com.treinamento.treino.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.treinamento.treino.dto.UsuarioDTO;
+import com.treinamento.treino.exception.RecursoNaoEncontradoException;
 import com.treinamento.treino.model.Usuario;
 import com.treinamento.treino.service.UsuarioService;
 
@@ -44,17 +46,27 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(usuarioService.buscarPorId(id));
+        Optional<UsuarioDTO> usuarioDTO = usuarioService.buscarPorId(id);
+        if (usuarioDTO.isPresent()) {
+            return ResponseEntity.ok(usuarioDTO.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/nome/{nome}")
-    public List<Usuario> buscarPorNome(@PathVariable String nome) {
-        return usuarioService.buscarPorNome(nome);
+    public ResponseEntity<List<UsuarioDTO>> buscarPorNome(@PathVariable String nome) {
+        return ResponseEntity.ok(usuarioService.buscarPorNome(nome));
     }
 
     @PutMapping("/{id}")
-    public Usuario atualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
-        return usuarioService.atualizar(id, usuario);
+    public ResponseEntity<UsuarioDTO> atualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
+        try {
+            UsuarioDTO usuarioAtualizado = usuarioService.atualizar(id, usuario);
+            return ResponseEntity.ok(usuarioAtualizado);
+        } catch (RecursoNaoEncontradoException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")

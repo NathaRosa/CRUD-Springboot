@@ -1,6 +1,7 @@
 package com.treinamento.treino.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,24 +36,30 @@ public class UsuarioService {
                 .map(this::converterParaDTO);
     }
 
-    public UsuarioDTO buscarPorId(Long id) {
+    public Optional<UsuarioDTO> buscarPorId(Long id) {
 
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário com id " + id + " não encontrado"));
                 
-        return converterParaDTO(usuario);
+        return Optional.of(converterParaDTO(usuario));
     }
 
-    public List<Usuario> buscarPorNome(String nome) {
-        return usuarioRepository.findByNomeContainingIgnoreCase(nome);
+    public List<UsuarioDTO> buscarPorNome(String nome) {
+        return usuarioRepository.findByNomeContainingIgnoreCase(nome)
+                .stream()
+                .map(this::converterParaDTO)
+                .toList();
     }
 
-    public Usuario atualizar(Long id, Usuario usuarioAtualizado) {
+    public UsuarioDTO atualizar(Long id, Usuario usuarioAtualizado) {
         return usuarioRepository.findById(id)
                 .map(usuario -> {
                     usuario.setNome(usuarioAtualizado.getNome());
                     usuario.setIdade(usuarioAtualizado.getIdade());
-                    return usuarioRepository.save(usuario);
+
+                    var usuarioSalvo = usuarioRepository.save(usuario);
+
+                    return converterParaDTO(usuarioSalvo);
                 })
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
