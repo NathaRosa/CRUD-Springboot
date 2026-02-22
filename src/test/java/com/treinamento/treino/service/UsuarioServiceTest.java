@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
 import com.treinamento.treino.dto.UsuarioDTO;
+import com.treinamento.treino.exception.RecursoNaoEncontradoException;
 import com.treinamento.treino.model.Usuario;
 import com.treinamento.treino.repository.UsuarioRepository;
 
@@ -38,7 +40,14 @@ public class UsuarioServiceTest {
 
         assertNotNull(usuarioDTO);
         assertEquals("Nathã", usuarioDTO.getNome());
+    }
 
-        
+    @Test
+    void deveLancarExcecaoQuandoUsuarioNaoExistir() {
+
+        when(usuarioRepository.findById(1L))
+            .thenReturn(Optional.empty());
+
+        assertThrows(RecursoNaoEncontradoException.class, () ->  usuarioService.buscarPorId(1L));
     }
 }

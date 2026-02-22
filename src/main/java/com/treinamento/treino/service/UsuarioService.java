@@ -61,12 +61,13 @@ public class UsuarioService {
 
                     return converterParaDTO(usuarioSalvo);
                 })
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
 
     public void deletar(Long id) {
         if(!usuarioRepository.existsById(id)) {
-            throw new RuntimeException("Usuário não encontrado");
+            throw new RecursoNaoEncontradoException("Usuário não encontrado");
+
         }
         usuarioRepository.deleteById(id);
     }
